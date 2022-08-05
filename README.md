@@ -1,70 +1,278 @@
-# Getting Started with Create React App
+## 创建项目
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+#### 快速开始
 
-## Available Scripts
+```
+npx create-react-app newsystem
+cd newsystem
+npm start
+```
 
-In the project directory, you can run:
+#### Sass应用
 
-### `npm start`
+```
+npm install node-sass --save
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+#### 项目配置
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+**反向代理**
 
-### `npm test`
+```
+npm install http-proxy-middleware --save
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+修改配置文件,src/setupProxy.js
 
-### `npm run build`
+```js
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+module.exports = function(app) {
+  app.use(
+    '/ajax',
+    createProxyMiddleware({
+      target: 'https://m.maoyan.com',
+      changeOrigin: true,
+    })
+  );
+};
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+修改app.js
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```js
+import "./index.css"
+import { useEffect } from 'react'
+import axios from 'axios'
 
-### `npm run eject`
+function App() {
+  useEffect(()=>{
+    axios.get("/ajax/movieOnInfoList?token=&optimus_uuid=74B5F0A032A711EB82DD6B9282E93C676D27D7B9731D4E608D7612C3E708C120&optimus_risk_level=71&optimus_code=10").then(res=>{
+      console.log(res.data)
+    })
+  },[])
+  return (
+    <div>
+      <h1>H1</h1>
+    </div>
+  )
+}
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+export default App
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+#### 安装路由
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+> 本版本默认5
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```
+npm install react-router-dom --save-dev
+```
 
-## Learn More
+创建IndexRouter.js
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```js
+import React from 'react'
+import {HashRouter,Redirect,Route, Switch} from 'react-router-dom'
+import Login from '../views/login/Login'
+import NewsSandBox from '../views/sandbox/NewsSandBox'
+export default function IndexRouter() {
+    return (
+        <HashRouter>
+            <Switch>
+                <Route path="/login" component={Login}/>
+                <Route path="/" render={()=>
+                    localStorage.getItem("token")?
+                    <NewsSandBox></NewsSandBox>:
+                    <Redirect to="/login"/>
+                }/>
+            </Switch>
+        </HashRouter>
+    )
+}
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+在App.js 引入路由表
 
-### Code Splitting
+```js
+import IndexRouter from "./router/IndexRouter";
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+function App() {
+  return (
+    <div>
+     <IndexRouter></IndexRouter>
+    </div>
+  )
+}
+export default App
+```
 
-### Analyzing the Bundle Size
+#### Ant Desgin引入
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+```
+yarn add antd
+```
 
-### Making a Progressive Web App
+修改src/app.js,引入antd的按钮组件
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```
 
-### Advanced Configuration
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+修改src/app.css在文件顶部引入antd/dist/antd.css
 
-### Deployment
+```
+@import '~antd.dist/antd.css'
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
 
-### `npm run build` fails to minify
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 项目配置
+
+#### 发送请求
+
+```
+# 安装
+npm install  -g json-server
+```
+
+Json 文件
+
+```json
+{
+  "posts": [
+    {
+      "id": 1,
+      "title": "1111-修改-11111",
+      "author": "kerwin"
+    },
+    {
+      "id": 2,
+      "title": "22222",
+      "author": "tiechui"
+    },
+    {
+      "title": "33333",
+      "author": "xiaoming",
+      "id": 3
+    }
+  ],
+  "comments": [
+    {
+      "id": 1,
+      "body": "11111-comment",
+      "postId": 1
+    },
+    {
+      "id": 2,
+      "body": "22222-comment",
+      "postId": 2
+    }
+  ]
+}
+```
+
+发送请求
+
+```
+json-server --watch ./db.json --port 5000
+```
+
+![Snipaste_2022-07-26_22-04-13](https://java-note-pic.oss-cn-beijing.aliyuncs.com/java/202207262204967.png)
+
+项目配置
+
+```js
+ import axios from 'axios'
+export default function Home() {
+
+    const ajax = ()=>{
+      // 获取数据
+        axios.get("http://localhost:8000/posts/2").then(res=>{
+            console.log(res.data)
+        })
+      // 添加数据
+        axios.post("http://localhost:8000/posts",{
+            title:"33333",
+            author:"xiaoming"
+        })
+      // 更新数据
+        axios.put("http://localhost:8000/posts/1",{
+            title:"1111-修改"
+        })
+        axios.patch("http://localhost:8000/posts/1",{
+            title:"1111-修改-11111"
+        })
+        axios.delete("http://localhost:8000/posts/1")
+        axios.get("http://localhost:8000/posts?_embed=comments").then(res=>{
+            console.log(res.data)
+        })
+        axios.get("http://localhost:8000/comments?_expand=post").then(res=>{
+            console.log(res.data)
+        })
+    }
+    return (
+        <div>
+            <Button type="primary" onClick={ajax}>Button</Button>
+        </div>
+    )
+}
+```
+
+
+![](https://java-note-pic.oss-cn-beijing.aliyuncs.com/java/202208051142880.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
